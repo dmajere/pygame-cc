@@ -1,9 +1,11 @@
 from __future__ import annotations
 import sys
 import pygame
+import pymunk
 from typing import Mapping, Callable, Tuple, List
 from pathlib import Path
 
+Color = Tuple[int, int, int]
 Coordinate = Tuple[int, int]
 
 
@@ -53,6 +55,35 @@ class Asset(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image, scale)
         self.rect = self.image.get_rect()
         self.rect.center = (self._pos_x, self._pos_y)
+
+
+class Physical(Asset):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        radius: int,
+        image: pygame.Surface,
+        space: pymunk.Space,
+        mass: float = 0,
+        inertia: float = 0,
+        body_type: int = pymunk.Body.DYNAMIC,
+        scale: Tuple[int, int] = None,
+    ) -> None:
+        super().__init__(x, y, image=image, scale=scale)
+
+        self.body = pymunk.body.Body(mass, inertia, body_type=body_type)
+        self.body.position = (x, y)
+        self.shape = pymunk.Circle(self.body, radius)
+        self.space = space
+        self.space.add(self.body, self.shape)
+
+    def update(self) -> None:
+        self.rect.center = self.body.position
+
+    def kill(self) -> None:
+        self.space.remove(self.body, self.shape)
+        super().kill()
 
 
 class Rotating(Asset):
@@ -202,7 +233,6 @@ class Game:
 
     def _load_assets(self, assets: Mapping[str, Path], load_func: Callable):
         loaded = AttrDict()
-        print("Assets", assets)
         for key, path in assets.items():
             loaded[key] = load_func(path)
         return loaded

@@ -10,7 +10,7 @@ class BouncingRect(pygame.Rect):
         self.speed_y = y
 
     def should_bounce_screen(self, screen: pygame.Surface) -> Tuple[bool, bool]:
-        w = screen.get_width() 
+        w = screen.get_width()
         h = screen.get_height()
         x, y = False, False
         if self.right >= w or self.left <= 0:
@@ -18,7 +18,7 @@ class BouncingRect(pygame.Rect):
         if self.bottom >= h or self.top <= 0:
             y = True
         return (x, y)
-    
+
     def should_bounce_rect(self, other: pygame.Rect) -> Tuple[bool, bool]:
         collision_tolerance = 10
         x, y = False, False
@@ -31,20 +31,20 @@ class BouncingRect(pygame.Rect):
                 x = True
             if abs(self.left - other.right) < collision_tolerance and self.speed_x < 0:
                 x = True
-        return x, y 
-    
+        return x, y
+
     def move(self, screen: pygame.Surface, other: pygame.Rect = None) -> None:
-        alter_x, alter_y = self.should_bounce_screen(screen) 
+        alter_x, alter_y = self.should_bounce_screen(screen)
         self.speed_x *= -1 if alter_x else 1
         self.speed_y *= -1 if alter_y else 1
         if other:
             alter_x, alter_y = self.should_bounce_rect(other)
             self.speed_x *= -1 if alter_x else 1
             self.speed_y *= -1 if alter_y else 1
-        
+
         self.x += self.speed_x
         self.y += self.speed_y
-    
+
 
 class Collision(Game):
     def init(self) -> None:
@@ -53,13 +53,14 @@ class Collision(Game):
         self.rect_b = BouncingRect(300, 600, 200, 100)
         self.rect_b.set_speed(0, 2)
 
+    def bounce(
+        self, rect: pygame.Rect, speed_x, speed_y, other: pygame.Rect = None
+    ) -> Tuple[int, int]:
 
-    def bounce(self, rect: pygame.Rect, speed_x, speed_y, other: pygame.Rect = None) -> Tuple[int, int]:
-        
         rect.x += speed_x
-        rect.y += speed_y 
+        rect.y += speed_y
         return speed_x, speed_y
-    
+
     def run(self) -> None:
         def _run(self) -> None:
             self.screen.fill((30, 30, 30))
@@ -70,6 +71,7 @@ class Collision(Game):
 
         events = {}
         self._loop(_run, events=events)
+
 
 game = Collision(800, 800)
 game.run()

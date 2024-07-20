@@ -4,6 +4,7 @@ import pygame
 from common import Game, Physical, Color, Coordinate
 from random import randint
 
+
 class Physics(Game):
     gravity = 40
     balls_num = 10
@@ -19,8 +20,12 @@ class Physics(Game):
         for _ in range(self.balls_num):
             self.balls.append(
                 self.create_ball(
-                    randint(self.ball_radius, self.screen.get_width() - self.ball_radius),
-                    randint(self.ball_radius, self.screen.get_height() - self.ball_radius),
+                    randint(
+                        self.ball_radius, self.screen.get_width() - self.ball_radius
+                    ),
+                    randint(
+                        self.ball_radius, self.screen.get_height() - self.ball_radius
+                    ),
                 )
             )
 
@@ -50,7 +55,7 @@ class Physics(Game):
             scale=(50, 50),
         )
         self.apple_group.add(apple)
-    
+
     def delete_apple(self) -> None:
         for apple in self.apple_group:
             if apple.rect.y >= self.screen.get_height():

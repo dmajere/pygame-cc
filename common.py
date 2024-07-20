@@ -2,10 +2,10 @@ from __future__ import annotations
 import sys
 import pygame
 import pymunk
-from typing import Mapping, Callable, Tuple, List
+from typing import Mapping, Callable, Tuple, List, Union
 from pathlib import Path
 
-Color = Tuple[int, int, int]
+Color = Union[Tuple[int, int, int], str]
 Coordinate = Tuple[int, int]
 
 
@@ -55,6 +55,31 @@ class Asset(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image, scale)
         self.rect = self.image.get_rect()
         self.rect.center = (self._pos_x, self._pos_y)
+
+
+class Masked(Asset):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        image: pygame.Surface,
+        scale: Tuple[int, int] = None,
+        shadow_color: Color = "grey",
+    ) -> None:
+        super().__init__(x, y, image=image, scale=scale)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.shadowed = self.make_shadowed(self.mask, shadow_color)
+
+    def make_shadowed(self, mask: pygame.mask.Mask, shadow_color: Color):
+        shadowed = mask.to_surface()
+        shadowed.set_colorkey((0, 0, 0))
+        width, height = shadowed.get_size()
+        for x in range(width):
+            for y in range(height):
+                color = shadowed.get_at((x, y))
+                if color != (0, 0, 0, 255):
+                    shadowed.set_at((x, y), shadow_color)
+        return shadowed
 
 
 class Physical(Asset):

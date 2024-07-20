@@ -22,7 +22,7 @@ class AnimationGame(Game):
 
 
 images = {
-    f"frog-0{idx}": f"assets/opp2_sprites/frames/frog_attack/frame-0{idx}.gif"
+    f"frog-0{idx}": f"assets/frog_attack/frame-0{idx}.gif"
     for idx in range(10)
 }
 

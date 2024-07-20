@@ -2,8 +2,6 @@ from pathlib import Path
 import pygame
 from common import Game, Asset, Rotating
 
-ASSETS_DIR = Path("assets/shooting-gallery-pack")
-
 
 class Rotate(Game):
     angle = 0
@@ -24,7 +22,7 @@ class Rotate(Game):
 
 
 images = {
-    "duck": ASSETS_DIR / "PNG" / "Objects" / "duck_yellow.png",
+    "duck": "assets/shooting/duck_yellow.png",
 }
 
 rotate = Rotate(500, 500, images=images)

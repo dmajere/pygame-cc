@@ -61,7 +61,7 @@ class Masks(Game):
 
 
 images = {
-    "duck": "assets/shooting-gallery-pack/PNG/Objects/duck_yellow.png",
+    "duck": "assets/shooting/duck_yellow.png",
 }
 game = Masks(600, 600, images=images)
 game.run()

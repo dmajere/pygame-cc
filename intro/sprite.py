@@ -5,7 +5,7 @@ from random import randint
 
 from common import Game, Asset
 
-ASSETS_DIR = Path("assets/shooting-gallery-pack")
+ASSETS_DIR = Path("assets/shooting")
 
 
 class Crosshair(Asset):
@@ -111,13 +111,13 @@ class ShootingRange(Game):
 screen_width = 800
 screen_height = 600
 images = {
-    "background": ASSETS_DIR / "PNG" / "Stall" / "bg_blue.png",
-    "ready": ASSETS_DIR / "PNG" / "HUD" / "text_ready.png",
-    "crosshair": ASSETS_DIR / "PNG" / "HUD" / "crosshair_red_small.png",
-    "target": ASSETS_DIR / "PNG" / "Objects" / "target_red1.png",
+    "background": ASSETS_DIR /  "bg_blue.png",
+    "ready": ASSETS_DIR / "text_ready.png",
+    "crosshair": ASSETS_DIR /  "crosshair_red_small.png",
+    "target": ASSETS_DIR /  "target_red1.png",
 }
 sounds = {
-    "shot": ASSETS_DIR / "Sounds" / "shot.wav",
+    "shot": ASSETS_DIR /  "shot.wav",
 }
 game = ShootingRange(
     screen_width=screen_width,

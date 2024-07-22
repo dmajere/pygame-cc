@@ -13,7 +13,7 @@ class Player(Static):
         WALK1 = 28
         WALK2 = 29
 
-    health = 100
+    health: int = 100
     gravity = 0
     in_jump = False
 
@@ -21,22 +21,27 @@ class Player(Static):
         print(event)
         if event.key == pygame.K_SPACE:
             self.jump()
-        
+
     def jump(self) -> None:
         if not self.in_jump:
             self.in_jump = True
             self.gravity = -20
-        
+
     def update(self) -> None:
         # if pygame.sprite.collide_rect(self, self.ground.sprite):
         if self.rect.bottom < self.ground.sprite.rect.top:
             self.gravity += 1
         elif self.rect.bottom > self.ground.sprite.rect.top:
-            self.rect.bottomleft = (self.rect.bottomleft[0], self.ground.sprite.rect.topleft[1])
+            self.rect.bottomleft = (
+                self.rect.bottomleft[0],
+                self.ground.sprite.rect.topleft[1],
+            )
             self.gravity = 0
             self.in_jump = False
         self.rect.y += self.gravity
 
-    def take_damage(self, damage: float) -> None:
-        self.health -= damage
-    
+    def take_damage(self, damage: int) -> None:
+        self.health -= int(damage)
+
+    def get_health(self) -> int:
+        return self.health

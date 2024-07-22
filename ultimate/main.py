@@ -66,18 +66,33 @@ class Ultimate(Game):
         self.ground = pygame.sprite.GroupSingle(self.get_ground_block())
 
         game_font = pygame.font.Font(None, 50)
-        self.score = pygame.sprite.GroupSingle(Text("Ulitmate", game_font, (255, 204, 1), (208, 244, 247), ))
+        self.score = pygame.sprite.GroupSingle(
+            Text(
+                "Ulitmate",
+                game_font,
+                (255, 204, 1),
+                (208, 244, 247),
+            )
+        )
         self.score.sprite.rect.center = (self.screen.get_width() // 2, 50)
-        self.game_over = pygame.sprite.GroupSingle(Text("Game Over", game_font, (255, 204, 1), (208, 244, 247), ))
+        self.game_over = pygame.sprite.GroupSingle(
+            Text(
+                "Game Over",
+                game_font,
+                (255, 204, 1),
+                (208, 244, 247),
+            )
+        )
         self.game_over.sprite.rect.center = (self.screen.get_width() // 2, 50)
 
         self.player = pygame.sprite.GroupSingle(self.make_player())
-        self.healthbar = HealthBar(75, 20, (215, 29, 29), icon=self.get_from_spritesheet(19, 4))
+        self.healthbar = HealthBar(
+            75, 20, (215, 29, 29), icon=self.get_from_spritesheet(19, 4)
+        )
         self.monster_group = pygame.sprite.Group()
 
         self.snail = self.make_snail(self.player.sprite)
         self.monster_group.add(self.snail)
-
 
     def get_background(self, bg: Background) -> pygame.Surface:
         background_width: int = 231
@@ -90,20 +105,20 @@ class Ultimate(Game):
             ),
             (self.screen.get_width(), self.screen.get_height()),
         )
-    
+
     def get_ground_block(self) -> Static:
         block_width = self.screen.get_width() // TILE_SIZE[0] + 1
         ground_height = int(self.screen.get_height() * 0.15)  # 15% is taken by ground
         block_height = ground_height // TILE_SIZE[1] + 1
 
         ground_images = {
-            str(terrain_type) : self.get_platform(
-            block_width, block_height, Shape.BLOCK, terrain_type)
+            str(terrain_type): self.get_platform(
+                block_width, block_height, Shape.BLOCK, terrain_type
+            )
             for terrain_type in TerrainType
         }
         ground = Static(ground_images, "0")
         return ground
-
 
     def get_platform(
         self, width: int, height: int, shape: Shape, terrain_type: TerrainType
@@ -124,10 +139,12 @@ class Ultimate(Game):
             ).convert_alpha(),
         }
         return Snail(player, snail_images, Snail.State.RUN, speed=(-3, 0))
-    
+
     def make_player(self) -> Player:
         player_images = {
-            str(value): pygame.transform.scale(self.get_from_spritesheet(value, 0) , (70, 70)).convert_alpha()
+            str(value): pygame.transform.scale(
+                self.get_from_spritesheet(value, 0), (70, 70)
+            ).convert_alpha()
             for value in Player.State
         }
         return Player(player_images, str(Player.State.IDLE))
@@ -192,6 +209,7 @@ class Ultimate(Game):
         self.player.sprite.ground = self.ground
 
         self.spawn = 0
+
         def _game_over(self) -> None:
             self.screen.fill((255, 0, 0))
             self.game_over.draw(self.screen)
@@ -199,7 +217,6 @@ class Ultimate(Game):
 
         def _hb_test(self) -> None:
             self.screen.fill((255, 255, 255))
-            self.healthbar.draw(self.screen, (400, 50))
             self.healthbar.damage(1)
             return True
 
@@ -216,18 +233,17 @@ class Ultimate(Game):
             self.ground.draw(self.screen)
             self.score.draw(self.screen)
 
+            self.healthbar.draw(self.screen, (50, 30))
             self.player.draw(self.screen)
             self.monster_group.draw(self.screen)
 
             self.player.update()
             self.monster_group.update()
-            print(self.player.sprite.health)
-            if self.player.sprite.health != 100:
+            self.healthbar.set_health(self.player.sprite.get_health())
+
+            if self.player.sprite.health <= 0:
                 return False
             return True
-        
-        self.loop(_hb_test, {})
-
 
         events = {
             pygame.KEYDOWN: self.player.sprite.action,

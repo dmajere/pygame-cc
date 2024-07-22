@@ -10,7 +10,7 @@ class Monster(Static):
 
     def __init__(
         self,
-        player: Player, 
+        player: Player,
         images: Dict[str, pygame.Surface],
         state: str,
         speed: Tuple[int, int] = (0, 0),
@@ -35,14 +35,13 @@ class Monster(Static):
         ):
             self.kill()
         self.rect.center = (pos_x + self.speed_x, pos_y + self.speed_y)
-    
 
     def update(self) -> None:
         if self.rect.colliderect(self.player.rect):
             if pygame.sprite.collide_mask(self.player, self):
                 self.player.take_damage(self.damage)
         self.move()
-    
+
 
 class Snail(Monster):
     class State(StrEnum):

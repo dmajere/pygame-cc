@@ -8,12 +8,12 @@ from functools import cache
 from monster import Snail
 from player import Player
 from lib.healthbar import HealthBar
+from lib.scorebar import ScoreBar
 
 SPRITESHEET_BG = (94, 129, 162)
 
 """
 TODO:
-* Score bar
 * Start menu
 * Stage return value
 """
@@ -66,15 +66,6 @@ class Ultimate(Game):
         self.ground = pygame.sprite.GroupSingle(self.get_ground_block())
 
         game_font = pygame.font.Font(None, 50)
-        self.score = pygame.sprite.GroupSingle(
-            Text(
-                "Ulitmate",
-                game_font,
-                (255, 204, 1),
-                (208, 244, 247),
-            )
-        )
-        self.score.sprite.rect.center = (self.screen.get_width() // 2, 50)
         self.game_over = pygame.sprite.GroupSingle(
             Text(
                 "Game Over",
@@ -89,9 +80,14 @@ class Ultimate(Game):
         self.healthbar = HealthBar(
             75, 20, (215, 29, 29), icon=self.get_from_spritesheet(19, 4)
         )
+        self.scorebar = ScoreBar(
+            40,
+            40,
+            [self.get_from_spritesheet(pos_x, 6) for pos_x in range(20, 30)],
+        )
         self.monster_group = pygame.sprite.Group()
 
-        self.snail = self.make_snail(self.player.sprite)
+        self.snail = self.make_snail(self.player.sprite, self.scorebar)
         self.monster_group.add(self.snail)
 
     def get_background(self, bg: Background) -> pygame.Surface:
@@ -126,25 +122,25 @@ class Ultimate(Game):
         terrain_tiles = self._get_terrain_tiles(terrain_type)
         return self._draw_shape(width, height, shape, terrain_tiles)
 
-    def make_snail(self, player) -> Snail:
+    def make_snail(self, player, score) -> Snail:
         snail_images = {
             Snail.State.RUN.value: pygame.transform.scale(
                 self.get_from_spritesheet(14, 15), (60, 60)
-            ).convert_alpha(),
+            ),
             Snail.State.HATCHED.value: pygame.transform.scale(
                 self.get_from_spritesheet(15, 15), (60, 60)
-            ).convert_alpha(),
+            ),
             Snail.State.DEAD.value: pygame.transform.scale(
                 self.get_from_spritesheet(16, 15), (60, 60)
-            ).convert_alpha(),
+            ),
         }
-        return Snail(player, snail_images, Snail.State.RUN, speed=(-3, 0))
+        return Snail(player, score, snail_images, Snail.State.RUN, speed=(-3, 0))
 
     def make_player(self) -> Player:
         player_images = {
             str(value): pygame.transform.scale(
                 self.get_from_spritesheet(value, 0), (70, 70)
-            ).convert_alpha()
+            )
             for value in Player.State
         }
         return Player(player_images, str(Player.State.IDLE))
@@ -157,7 +153,7 @@ class Ultimate(Game):
             start_at=TILE_START_AT,
             margin=TILE_MARGIN,
             color=SPRITESHEET_BG,
-        )
+        ).convert_alpha()
 
     @cache
     def _get_terrain_tiles(
@@ -216,8 +212,8 @@ class Ultimate(Game):
             return True
 
         def _hb_test(self) -> None:
-            self.screen.fill((255, 255, 255))
-            self.healthbar.damage(1)
+            self.screen.fill(SPRITESHEET_BG)
+            self.scorebar.draw(self.screen, (self.screen.get_width() - 50, 30))
             return True
 
         def _run(self) -> None:
@@ -231,9 +227,9 @@ class Ultimate(Game):
 
             # self.screen.blit(self.title, (300, 50))
             self.ground.draw(self.screen)
-            self.score.draw(self.screen)
-
             self.healthbar.draw(self.screen, (50, 30))
+            self.scorebar.draw(self.screen, (self.screen.get_width() - 50, 30))
+
             self.player.draw(self.screen)
             self.monster_group.draw(self.screen)
 

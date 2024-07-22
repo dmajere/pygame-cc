@@ -4,6 +4,7 @@ from lib.asset import Static
 from enum import StrEnum
 from lib.types import Coordinate
 from player import Player
+from lib.scorebar import ScoreBar
 
 
 class Monster(Static):
@@ -11,6 +12,7 @@ class Monster(Static):
     def __init__(
         self,
         player: Player,
+        score: ScoreBar,
         images: Dict[str, pygame.Surface],
         state: str,
         speed: Tuple[int, int] = (0, 0),
@@ -18,6 +20,7 @@ class Monster(Static):
     ) -> None:
         super().__init__(images, state)
         self.player = player
+        self.score = score
         self.speed_x, self.speed_y = speed
         self.damage = damage
 
@@ -33,6 +36,7 @@ class Monster(Static):
             or pos_x >= screen_width + 100
             or pos_y >= screen_height + 100
         ):
+            self.score.add(1)
             self.kill()
         self.rect.center = (pos_x + self.speed_x, pos_y + self.speed_y)
 

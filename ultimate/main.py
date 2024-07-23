@@ -88,10 +88,12 @@ class Ultimate(Game):
         self.player = pygame.sprite.GroupSingle(self.make_player())
 
         self.monster_group = pygame.sprite.Group()
-        self.timers.append(Timer(
-            self.spawn_snail,
-            second=2,
-        ))
+        self.timers.append(
+            Timer(
+                self.spawn_snail,
+                second=2,
+            )
+        )
 
     def get_background(self, bg: Background) -> pygame.Surface:
         background_width: int = 231
@@ -126,25 +128,19 @@ class Ultimate(Game):
         return self._draw_shape(width, height, shape, terrain_tiles)
 
     def start_timers(self) -> None:
-        [
-            t.start() for t in self.timers
-        ]
-    
+        [t.start() for t in self.timers]
+
     def tick_timers(self) -> None:
-        [
-            t.tick() for t in self.timers
-        ]
-    
+        [t.tick() for t in self.timers]
+
     def stop_timers(self) -> None:
-        [
-            t.stop() for t in self.timers
-        ]
+        [t.stop() for t in self.timers]
 
     def spawn_snail(self) -> None:
         self.snail = self.make_snail(self.player.sprite, self.scorebar)
         self.monster_group.add(self.snail)
         self.snail.start_at(self.ground.sprite.rect.topright)
-    
+
     def make_snail(self, player, score) -> Snail:
         snail_images = {
             Snail.State.RUN.value: pygame.transform.scale(
@@ -306,6 +302,7 @@ class Ultimate(Game):
         self.player.sprite.ground = self.ground
 
         self.start_timers()
+
         def _run(self) -> None:
             self.tick_timers()
 

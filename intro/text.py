@@ -3,7 +3,6 @@ from common import Game, TextBox
 
 
 class Text(Game):
-
     def init(self) -> None:
         self.textbox = TextBox(200, 200, 140, 32, default_text="Input")
         pygame.mouse.set_visible(True)

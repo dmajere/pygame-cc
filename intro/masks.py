@@ -3,7 +3,6 @@ from common import Game, Masked
 
 
 class Player(Masked):
-
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
 
@@ -13,7 +12,6 @@ class Obstacle(Masked):
 
 
 class Masks(Game):
-
     def init(self) -> None:
         ps = pygame.Surface((20, 20))
         ps.fill((255, 0, 0))

@@ -14,12 +14,14 @@ class Timer:
         return pygame.time.get_ticks()
 
     def tick(self):
-        if not self._pause and (self.current_time - self._last_trigger >= self._threshold):
-            self._func() 
+        if not self._pause and (
+            self.current_time - self._last_trigger >= self._threshold
+        ):
+            self._func()
             self._last_trigger = self.current_time
-    
+
     def stop(self) -> None:
         self._pause = True
-    
+
     def start(self) -> None:
         self._pause = False

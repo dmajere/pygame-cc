@@ -69,7 +69,6 @@ class Physics(Game):
             pygame.draw.circle(self.screen, color, shape.body.position, shape.radius)
 
     def run(self) -> None:
-
         def _run(self) -> None:
             self.screen.fill((255, 255, 255))
             pygame.mouse.set_visible(True)

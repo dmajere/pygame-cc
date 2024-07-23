@@ -21,10 +21,7 @@ class AnimationGame(Game):
         self._loop(_run, events=events)
 
 
-images = {
-    f"frog-0{idx}": f"assets/frog_attack/frame-0{idx}.gif"
-    for idx in range(10)
-}
+images = {f"frog-0{idx}": f"assets/frog_attack/frame-0{idx}.gif" for idx in range(10)}
 
 game = AnimationGame(
     800,

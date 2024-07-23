@@ -4,7 +4,6 @@ from typing import Tuple
 
 
 class BouncingRect(pygame.Rect):
-
     def set_speed(self, x, y):
         self.speed_x = x
         self.speed_y = y

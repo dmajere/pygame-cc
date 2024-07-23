@@ -8,7 +8,6 @@ from lib.scorebar import ScoreBar
 
 
 class Monster(Static):
-
     def __init__(
         self,
         player: Player,

@@ -18,7 +18,6 @@ class AttrDict(dict):
 
 
 class Timer:
-
     def __init__(self, clock: pygame.time.Clock, threshold: int = 2000) -> None:
         self.__clock = clock
         self.__threshold = threshold
@@ -168,7 +167,6 @@ class Animation(pygame.sprite.Sprite):
 
 
 class TextBox:
-
     def __init__(
         self,
         x: int,

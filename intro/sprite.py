@@ -111,13 +111,13 @@ class ShootingRange(Game):
 screen_width = 800
 screen_height = 600
 images = {
-    "background": ASSETS_DIR /  "bg_blue.png",
+    "background": ASSETS_DIR / "bg_blue.png",
     "ready": ASSETS_DIR / "text_ready.png",
-    "crosshair": ASSETS_DIR /  "crosshair_red_small.png",
-    "target": ASSETS_DIR /  "target_red1.png",
+    "crosshair": ASSETS_DIR / "crosshair_red_small.png",
+    "target": ASSETS_DIR / "target_red1.png",
 }
 sounds = {
-    "shot": ASSETS_DIR /  "shot.wav",
+    "shot": ASSETS_DIR / "shot.wav",
 }
 game = ShootingRange(
     screen_width=screen_width,

@@ -6,7 +6,7 @@ from lib.asset import Static, Text
 from lib.game import Game
 from lib.types import AttrDict, Coordinate
 from functools import cache
-from monster import Snail
+from monster import Snail, Fly
 from player import Player
 from lib.healthbar import HealthBar
 from lib.scorebar import ScoreBar
@@ -94,6 +94,12 @@ class Ultimate(Game):
                 second=2,
             )
         )
+        self.timers.append(
+            Timer(
+                self.spawn_fly,
+                second=3,
+            )
+        )
 
     def get_background(self, bg: Background) -> pygame.Surface:
         background_width: int = 231
@@ -137,13 +143,16 @@ class Ultimate(Game):
         [t.stop() for t in self.timers]
 
     def spawn_snail(self) -> None:
-        self.snail = self.make_snail(self.player.sprite, self.scorebar)
-        self.monster_group.add(self.snail)
-        self.snail.start_at(self.ground.sprite.rect.topright)
+        snail = self.make_snail(self.player.sprite, self.scorebar)
+        snail.start_at(self.ground.sprite.rect.topright)
+        self.monster_group.add(snail)
 
     def make_snail(self, player, score) -> Snail:
         snail_images = {
-            Snail.State.RUN.value: pygame.transform.scale(
+            Snail.State.RUN1.value: pygame.transform.scale(
+                self.get_from_spritesheet(13, 15), (60, 60)
+            ),
+            Snail.State.RUN2.value: pygame.transform.scale(
                 self.get_from_spritesheet(14, 15), (60, 60)
             ),
             Snail.State.HATCHED.value: pygame.transform.scale(
@@ -153,7 +162,34 @@ class Ultimate(Game):
                 self.get_from_spritesheet(16, 15), (60, 60)
             ),
         }
-        return Snail(player, score, snail_images, Snail.State.RUN, speed=(-3, 0))
+        return Snail(player, score, snail_images, Snail.State.RUN1, speed=(-3, 0))
+
+    def spawn_fly(self) -> None:
+        fly = self.make_fly(self.player.sprite, self.scorebar)
+        x, y = self.ground.sprite.rect.topright
+        fly.start_at((x, y - 20))
+        self.monster_group.add(fly)
+
+    def make_fly(self, player, score) -> Fly:
+        fly_images = {
+            Snail.State.RUN1.value: pygame.transform.scale(
+                self.get_from_spritesheet(13, 14), (60, 60)
+            ),
+            Snail.State.RUN2.value: pygame.transform.scale(
+                self.get_from_spritesheet(14, 14), (60, 60)
+            ),
+            Snail.State.DEAD.value: pygame.transform.scale(
+                self.get_from_spritesheet(15, 14), (60, 60)
+            ),
+        }
+        return Fly(
+            player,
+            score,
+            fly_images,
+            Fly.State.RUN1,
+            speed=(-5, 0),
+            run_animation_speed=5,
+        )
 
     def make_player(self) -> Player:
         player_images = {
@@ -308,7 +344,6 @@ class Ultimate(Game):
 
             self.screen.blit(background, (0, 0))
 
-            # self.screen.blit(self.title, (300, 50))
             self.ground.draw(self.screen)
             self.healthbar.draw(self.screen, (50, 30))
             self.scorebar.draw(self.screen, (self.screen.get_width() - 50, 30))

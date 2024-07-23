@@ -1,6 +1,7 @@
 import pygame
 from lib.asset import Static
 from enum import IntEnum
+from itertools import cycle
 
 
 class Player(Static):
@@ -17,6 +18,16 @@ class Player(Static):
     gravity = 0
     in_jump = False
 
+    _walk_frames = cycle([State.WALK1, State.WALK2])
+    _walk_speed = 20
+    _current_frame = 0
+
+    def _animate_walk(self) -> None:
+        self._current_frame += 1
+        if self._current_frame >= self._walk_speed:
+            self._current_frame = 0
+            self.set_state(str(self._walk_frames.__next__()))
+
     def action(self, event: pygame.event.Event) -> None:
         if event.key == pygame.K_SPACE:
             self.jump()
@@ -29,6 +40,7 @@ class Player(Static):
     def update(self) -> None:
         # if pygame.sprite.collide_rect(self, self.ground.sprite):
         if self.rect.bottom < self.ground.sprite.rect.top:
+            self.set_state(str(self.State.JUMP))
             self.gravity += 1
         elif self.rect.bottom > self.ground.sprite.rect.top:
             self.rect.bottomleft = (
@@ -37,6 +49,8 @@ class Player(Static):
             )
             self.gravity = 0
             self.in_jump = False
+        else:
+            self._animate_walk()
         self.rect.y += self.gravity
 
     def take_damage(self, damage: int) -> None:

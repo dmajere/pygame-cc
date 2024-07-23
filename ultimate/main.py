@@ -1,3 +1,4 @@
+import sys
 import pygame
 from typing import Dict, Tuple, Callable
 from enum import IntEnum
@@ -9,13 +10,17 @@ from monster import Snail
 from player import Player
 from lib.healthbar import HealthBar
 from lib.scorebar import ScoreBar
+from lib.button import Button
 
 SPRITESHEET_BG = (94, 129, 162)
 
+
+class GameOver(Exception):
+    pass
+
+
 """
 TODO:
-* Start menu
-* Stage return value
 """
 
 
@@ -52,6 +57,14 @@ TILES_FRAMES: Dict[str, Tuple[Callable, int]] = {
 
 
 class Ultimate(Game):
+    char_height = 50
+    text_color = (255, 204, 1)
+    button_color = ((94, 129, 162),)
+
+    start_game_button = None
+    retry_game_button = None
+    exit_game_button = None
+    stage = None
 
     STAGES = [
         AttrDict(
@@ -65,13 +78,16 @@ class Ultimate(Game):
     def init(self) -> None:
         self.ground = pygame.sprite.GroupSingle(self.get_ground_block())
 
-        game_font = pygame.font.Font(None, 50)
+        self.game_font = pygame.font.Font(None, self.char_height)
+
+        self.init_buttons()
+
         self.game_over = pygame.sprite.GroupSingle(
             Text(
                 "Game Over",
-                game_font,
-                (255, 204, 1),
-                (208, 244, 247),
+                self.game_font,
+                self.text_color,
+                self.button_color,
             )
         )
         self.game_over.sprite.rect.center = (self.screen.get_width() // 2, 50)
@@ -189,9 +205,70 @@ class Ultimate(Game):
                     block.blit(tile, (pos_x, pos_y))
             return block
 
-    def run(self) -> None:
-        STAGE = 0
-        stage_config: AttrDict = self.STAGES[STAGE]
+    def start_game(self):
+        self.stage = 0
+
+    def init_buttons(self):
+        if not self.start_game_button:
+            start_game_text = Text("Start Game", self.game_font, self.text_color)
+            self.start_game_button = Button(
+                self.button_color,
+                onClick=self.start_game,
+                margin=8,
+                border_width=2,
+                border_radius=10,
+                border_color="darkblue",
+                text=start_game_text,
+            )
+        if not self.exit_game_button:
+            exit_game_text = Text("Exit", self.game_font, self.text_color)
+            self.exit_game_button = Button(
+                self.button_color,
+                onClick=self.exit,
+                width=self.start_game_button.rect.width,
+                height=self.start_game_button.rect.height,
+                border_width=2,
+                border_radius=10,
+                border_color="darkblue",
+                text=exit_game_text,
+            )
+        if not self.retry_game_button:
+            retry_text = Text("Retry?", self.game_font, self.text_color)
+            self.retry_game_button = Button(
+                self.button_color,
+                onClick=self.start_game,
+                width=self.start_game_button.rect.width,
+                height=self.start_game_button.rect.height,
+                border_width=2,
+                border_radius=10,
+                border_color="darkblue",
+                text=retry_text,
+            )
+
+    def run_game_menu(self) -> None:
+        background = self.get_background(Background.SKY)
+
+        def _process_event(event: pygame.event.Event):
+            self.start_game_button.process_event(event)
+            self.exit_game_button.process_event(event)
+
+        def _run_menu(self) -> bool:
+            if self.stage is not None:
+                return False
+            self.screen.blit(background, (0, 0))
+            pygame.mouse.set_visible(True)
+
+            self.start_game_button.draw(self.screen, (400, 200))
+            self.exit_game_button.draw(self.screen, (400, 300))
+            return True
+
+        events = {
+            pygame.MOUSEBUTTONDOWN: _process_event,
+        }
+        self.loop(_run_menu, events=events)
+
+    def run_stage(self, stage: int) -> None:
+        stage_config: AttrDict = self.STAGES[stage]
 
         background = self.get_background(stage_config.background)
 
@@ -204,17 +281,8 @@ class Ultimate(Game):
         self.player.sprite.rect.bottomleft = (20, ground_pos_y)
         self.player.sprite.ground = self.ground
 
+        # TODO: redo with timer
         self.spawn = 0
-
-        def _game_over(self) -> None:
-            self.screen.fill((255, 0, 0))
-            self.game_over.draw(self.screen)
-            return True
-
-        def _hb_test(self) -> None:
-            self.screen.fill(SPRITESHEET_BG)
-            self.scorebar.draw(self.screen, (self.screen.get_width() - 50, 30))
-            return True
 
         def _run(self) -> None:
             if self.spawn >= 27000:
@@ -238,14 +306,50 @@ class Ultimate(Game):
             self.healthbar.set_health(self.player.sprite.get_health())
 
             if self.player.sprite.health <= 0:
-                return False
+                raise GameOver()
             return True
 
         events = {
             pygame.KEYDOWN: self.player.sprite.action,
         }
         self.loop(_run, events=events)
-        self.loop(_game_over, events={})
+
+    def run_game_over(self) -> None:
+        background = self.get_background(Background.SKY)
+        self.stage = None
+
+        def _process_event(event: pygame.event.Event):
+            self.retry_game_button.process_event(event)
+            self.exit_game_button.process_event(event)
+
+        def _run_game_over(self) -> bool:
+            if self.stage is not None:
+                return False
+
+            self.screen.blit(background, (0, 0))
+            pygame.mouse.set_visible(True)
+
+            self.game_over.draw(self.screen)
+
+            self.retry_game_button.draw(self.screen, (400, 200))
+            self.exit_game_button.draw(self.screen, (400, 300))
+            return True
+
+        self.loop(
+            _run_game_over,
+            events={
+                pygame.MOUSEBUTTONDOWN: _process_event,
+            },
+        )
+
+    def run(self) -> None:
+        self.run_game_menu()
+        while True:
+            self.player.sprite.health = 100
+            try:
+                self.run_stage(self.stage)
+            except GameOver:
+                self.run_game_over()
 
 
 screen_width = 800

@@ -72,5 +72,5 @@ class Text(pygame.sprite.Sprite):
         background: Color = None,
     ) -> None:
         super().__init__()
-        self.image = font.render(text, False, color, background)
+        self.image = font.render(text, False, color, background).convert_alpha()
         self.rect = self.image.get_rect()

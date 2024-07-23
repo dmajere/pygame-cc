@@ -18,7 +18,6 @@ class Player(Static):
     in_jump = False
 
     def action(self, event: pygame.event.Event) -> None:
-        print(event)
         if event.key == pygame.K_SPACE:
             self.jump()
 

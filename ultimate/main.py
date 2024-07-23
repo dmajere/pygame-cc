@@ -11,6 +11,7 @@ from player import Player
 from lib.healthbar import HealthBar
 from lib.scorebar import ScoreBar
 from lib.button import Button
+from lib.timer import Timer
 
 SPRITESHEET_BG = (94, 129, 162)
 
@@ -64,7 +65,10 @@ class Ultimate(Game):
     start_game_button = None
     retry_game_button = None
     exit_game_button = None
+
     stage = None
+    session_start_time = 0
+    timers = []
 
     STAGES = [
         AttrDict(
@@ -76,35 +80,18 @@ class Ultimate(Game):
     ]
 
     def init(self) -> None:
-        self.ground = pygame.sprite.GroupSingle(self.get_ground_block())
-
         self.game_font = pygame.font.Font(None, self.char_height)
-
         self.init_buttons()
+        self.init_hud()
 
-        self.game_over = pygame.sprite.GroupSingle(
-            Text(
-                "Game Over",
-                self.game_font,
-                self.text_color,
-                self.button_color,
-            )
-        )
-        self.game_over.sprite.rect.center = (self.screen.get_width() // 2, 50)
-
+        self.ground = pygame.sprite.GroupSingle(self.get_ground_block())
         self.player = pygame.sprite.GroupSingle(self.make_player())
-        self.healthbar = HealthBar(
-            75, 20, (215, 29, 29), icon=self.get_from_spritesheet(19, 4)
-        )
-        self.scorebar = ScoreBar(
-            40,
-            40,
-            [self.get_from_spritesheet(pos_x, 6) for pos_x in range(20, 30)],
-        )
-        self.monster_group = pygame.sprite.Group()
 
-        self.snail = self.make_snail(self.player.sprite, self.scorebar)
-        self.monster_group.add(self.snail)
+        self.monster_group = pygame.sprite.Group()
+        self.timers.append(Timer(
+            self.spawn_snail,
+            second=2,
+        ))
 
     def get_background(self, bg: Background) -> pygame.Surface:
         background_width: int = 231
@@ -138,6 +125,26 @@ class Ultimate(Game):
         terrain_tiles = self._get_terrain_tiles(terrain_type)
         return self._draw_shape(width, height, shape, terrain_tiles)
 
+    def start_timers(self) -> None:
+        [
+            t.start() for t in self.timers
+        ]
+    
+    def tick_timers(self) -> None:
+        [
+            t.tick() for t in self.timers
+        ]
+    
+    def stop_timers(self) -> None:
+        [
+            t.stop() for t in self.timers
+        ]
+
+    def spawn_snail(self) -> None:
+        self.snail = self.make_snail(self.player.sprite, self.scorebar)
+        self.monster_group.add(self.snail)
+        self.snail.start_at(self.ground.sprite.rect.topright)
+    
     def make_snail(self, player, score) -> Snail:
         snail_images = {
             Snail.State.RUN.value: pygame.transform.scale(
@@ -245,6 +252,25 @@ class Ultimate(Game):
                 text=retry_text,
             )
 
+    def init_hud(self) -> None:
+        self.healthbar = HealthBar(
+            75, 20, (215, 29, 29), icon=self.get_from_spritesheet(19, 4)
+        )
+        self.scorebar = ScoreBar(
+            40,
+            40,
+            [self.get_from_spritesheet(pos_x, 6) for pos_x in range(20, 30)],
+        )
+        self.game_over = pygame.sprite.GroupSingle(
+            Text(
+                "Game Over",
+                self.game_font,
+                self.text_color,
+                self.button_color,
+            )
+        )
+        self.game_over.sprite.rect.center = (self.screen.get_width() // 2, 50)
+
     def run_game_menu(self) -> None:
         background = self.get_background(Background.SKY)
 
@@ -273,23 +299,15 @@ class Ultimate(Game):
         background = self.get_background(stage_config.background)
 
         ground_pos_y = self.screen.get_height() - self.ground.sprite.rect.height
-
         self.ground.sprite.rect.topleft = (0, ground_pos_y)
         self.ground.sprite.set_state(str(stage_config.terrain))
-        self.snail.start_at(self.ground.sprite.rect.topright)
 
         self.player.sprite.rect.bottomleft = (20, ground_pos_y)
         self.player.sprite.ground = self.ground
 
-        # TODO: redo with timer
-        self.spawn = 0
-
+        self.start_timers()
         def _run(self) -> None:
-            if self.spawn >= 27000:
-                self.spawn = 0
-                self.monster_group.add(self.snail)
-                self.snail.start_at(self.ground.sprite.rect.topright)
-            self.spawn += 60
+            self.tick_timers()
 
             self.screen.blit(background, (0, 0))
 
@@ -306,6 +324,7 @@ class Ultimate(Game):
             self.healthbar.set_health(self.player.sprite.get_health())
 
             if self.player.sprite.health <= 0:
+                self.stop_timers()
                 raise GameOver()
             return True
 

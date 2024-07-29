@@ -27,7 +27,13 @@ class Level:
 
         for obj in map.get_layer_by_name("Objects"):
             if obj.name == "player":
-                Player((obj.x, obj.y), obj.image, self.sprites, self.player)
+                Player(
+                    (obj.x, obj.y),
+                    obj.image,
+                    self.collision_sprites,
+                    self.sprites,
+                    self.player,
+                )
 
     def draw(self, surface: pygame.Surface, dt: float) -> None:
         surface.fill("black")
